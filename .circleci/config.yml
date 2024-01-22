@@ -7,6 +7,10 @@ aliases:
 - &test
   name: Test
   command: echo "him test alias"
+  
+- &test
+  name: Test
+  command: echo "two aliases"
 
 
 jobs:
