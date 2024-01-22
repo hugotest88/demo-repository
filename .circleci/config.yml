@@ -25,7 +25,7 @@ jobs:
       - run: echo <<pipeline.git.base_revision>>
 #      - run: echo <<pipeline.trigger_parameters.webhook.body>>
       - run: echo <<pipeline.in_setup>>
-      - run: echo <<pipeline.trigger_parameters.github_app.default_branch>>
+#      - run: echo <<pipeline.trigger_parameters.github_app.default_branch>>
       - run: echo <<pipeline.schedule.name>>
       - run: echo <<pipeline.schedule.id>>
       - run: echo $CIRCLE_PROJECT_USERNAME
