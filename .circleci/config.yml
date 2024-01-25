@@ -2,8 +2,24 @@ version: 2.1
 orbs: 
   slack: circleci/slack@4.12.5
   win: circleci/windows@5.0 # The Windows orb gives you everything you need to start using the Windows executor. 
+
+aliases:
+- &test
+  name: Test
+  command: echo "him test alias"
   
+- &test
+  name: Test
+  command: echo "two aliases"
+
+
 jobs:
+  alias-test-job:
+    docker:
+      - image: cimg/node:17.2.0
+    steps:
+      - run: *test
+      
   hello-job:
     docker:
   #    - image: cimg/node:17.2.0 # the primary container, where your job's commands are run
@@ -27,6 +43,7 @@ jobs:
       - run: echo <<pipeline.git.base_revision>>
 #      - run: echo <<pipeline.trigger_parameters.webhook.body>>
       - run: echo <<pipeline.in_setup>>
+#      - run: echo <<pipeline.trigger_parameters.github_app.default_branch>>
       - run: echo <<pipeline.schedule.name>>
       - run: echo <<pipeline.schedule.id>>
       - run: echo $CIRCLE_PROJECT_USERNAME
@@ -65,4 +82,5 @@ workflows:
       - hello-job # comment
       - windows-test
       - hello2-job
+      - alias-test-job
 
