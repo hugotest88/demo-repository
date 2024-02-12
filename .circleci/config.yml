@@ -24,3 +24,4 @@ workflows:
             only:
             - main
             - dev
+            - testTranslator
