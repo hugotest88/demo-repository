@@ -1,14 +1,26 @@
 version: 2.1
-executors:
-  default_image:
-    docker:
-    - image: cimg/base:current
 jobs:
-  test:
-    executor: default_image
+  unittest:
+    environment:
+      GITHUB_PAT: ${{ secrets.GH_PAT }}
+      GITHUB_APP_ID: ${{ secrets.GH_APP_ID }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GITHUB_APP_PEM: ${{ secrets.GH_APP_PEM }}
+    docker:
+    - image: python:${{ matrix.python-version }}
     steps:
     - checkout
+    - run:
+        command: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry install
+          poetry run pytest -n 4 tests/e2e
 workflows:
-  Auto Assign:
+  e2e Tests:
     jobs:
-    - test
+    - unittest:
+        filters:
+          branches:
+            only:
+            - main
+            - dev
