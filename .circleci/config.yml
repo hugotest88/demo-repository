@@ -4,11 +4,11 @@ executors:
     docker:
     - image: cimg/base:latest
 jobs:
-  run:
+  test:
     executor: default_image
     steps:
     - checkout
 workflows:
   Auto Assign:
     jobs:
-    - run
+    - test
