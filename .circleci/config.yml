@@ -1,21 +1,19 @@
 version: 2.1
-executors:
-  default_image:
-    docker:
-    - image: cimg/base:current
 jobs:
-  test:
-    executor: default_image
+  build:
+    docker:
+    - image: cimg/openjdk:latest
+    - image: circleci/openjdkjdk:latest
     steps:
     - checkout
     - run:
         command: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt  # Adjust this command according to your
-          requirements
-          pytest
-          
+          mvn -B package --file pom.xml
 workflows:
-  Run Tests:
+  Java CI with Maven:
     jobs:
-    - test
+    - build:
+        filters:
+          branches:
+            only:
+            - main
