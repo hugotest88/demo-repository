@@ -1,20 +1,124 @@
 version: 2.1
+
+
 jobs:
-  build:
-    docker:
-    - image: cimg/openjdk:21.0.2
- #   - image: circleci/openjdkjdk:21.0.2
-    steps:
-    - checkout
-    - run:
-        command: |
-          mvn -B package --file pom.xml
+ lint:
+   docker:
+   - image: cimg/node:12.16
+   steps:
+   - checkout
+   - restore_cache:
+       keys:
+       - node-{{ checksum "package-lock.json" }}
+   - run:
+       command: |
+         npm ci
+         npm run lint
+         npm run check-git-clean
+   - save_cache:
+       paths:
+       - ~/.npm
+       key: node-{{ checksum "package-lock.json" }}
+ type-check:
+   docker:
+   - image: cimg/node:12.16
+   steps:
+   - checkout
+   - restore_cache:
+       keys:
+       - node-{{ checksum "package-lock.json" }}
+   - run:
+       command: |
+         npm ci
+         npm run type-check
+         npm run check-git-clean
+   - save_cache:
+       paths:
+       - ~/.npm
+       - ~/.dts
+       key: node-{{ checksum "package-lock.json" }}
+ unit-test:
+   docker:
+   - image: cimg/node:12.16
+   steps:
+   - checkout
+   - restore_cache:
+       keys:
+       - node-{{ checksum "package-lock.json" }}
+   - run:
+       command: |
+         npm ci
+         npm run build
+         npm run unit-test
+         npm run check-git-clean
+   - save_cache:
+       paths:
+       - ~/.npm
+       key: node-{{ checksum "package-lock.json" }}
+ website:
+   docker:
+   - image: cimg/node:12.16
+   steps:
+   - checkout
+   - restore_cache:
+       keys:
+       - node-{{ checksum "package-lock.json" }}
+   - run:
+       command: |
+         npm ci
+         NODE_OPTIONS=--openssl-legacy-provider npm run website:build
+         npm run check-git-clean
+   - save_cache:
+       paths:
+       - ~/.npm
+       key: node-{{ checksum "package-lock.json" }}
+ publish:
+   docker:
+   - image: cimg/node:12.16
+   steps:
+   - checkout
+   - restore_cache:
+       keys:
+       - node-{{ checksum "package-lock.json" }}
+   - run:
+       command: |
+         npm ci
+         npm run build
+         NODE_OPTIONS=--openssl-legacy-provider npm run website:build
+   - save_cache:
+       paths:
+       - ~/.npm
+       key: node-{{ checksum "package-lock.json" }}
 workflows:
-  Java CI with Maven:
-    jobs:
-    - build:
-        filters:
-          branches:
-            only:
-            - main
-            - testTranslator
+ CI:
+   jobs:
+   - lint:
+       filters:
+         branches:
+           only:
+           - main
+   - type-check:
+       filters:
+         branches:
+           only:
+           - main
+   - unit-test:
+       filters:
+         branches:
+           only:
+           - main
+   - website:
+       filters:
+         branches:
+           only:
+           - main
+   - publish:
+       filters:
+         branches:
+           only:
+           - main
+       requires:
+       - lint
+       - type-check
+       - unit-test
+       - website
