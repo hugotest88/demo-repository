@@ -1,10 +1,8 @@
 version: 2.1
-
-
 jobs:
  lint:
    docker:
-   - image: cimg/node:12.16
+   - image: cimg/node:18.4.0
    steps:
    - checkout
    - restore_cache:
@@ -21,7 +19,7 @@ jobs:
        key: node-{{ checksum "package-lock.json" }}
  type-check:
    docker:
-   - image: cimg/node:12.16
+   - image: cimg/node:18.4.0
    steps:
    - checkout
    - restore_cache:
@@ -39,7 +37,7 @@ jobs:
        key: node-{{ checksum "package-lock.json" }}
  unit-test:
    docker:
-   - image: cimg/node:12.16
+   - image: cimg/node:18.4.0
    steps:
    - checkout
    - restore_cache:
@@ -57,7 +55,7 @@ jobs:
        key: node-{{ checksum "package-lock.json" }}
  website:
    docker:
-   - image: cimg/node:12.16
+   - image: cimg/node:18.4.0
    steps:
    - checkout
    - restore_cache:
@@ -74,7 +72,7 @@ jobs:
        key: node-{{ checksum "package-lock.json" }}
  publish:
    docker:
-   - image: cimg/node:12.16
+   - image: cimg/node:18.4.0
    steps:
    - checkout
    - restore_cache:
@@ -96,27 +94,27 @@ workflows:
        filters:
          branches:
            only:
-           - main
+           - testTranslator
    - type-check:
        filters:
          branches:
            only:
-           - main
+           - testTranslator
    - unit-test:
        filters:
          branches:
            only:
-           - main
+           - testTranslator
    - website:
        filters:
          branches:
            only:
-           - main
+           - testTranslator
    - publish:
        filters:
          branches:
            only:
-           - main
+           - testTranslator
        requires:
        - lint
        - type-check
