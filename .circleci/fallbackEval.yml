@@ -1,0 +1,29 @@
+# Couldn't automatically generate a config from your source code.
+# This is a generic template to serve as a base for your custom config
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+orbs:
+  evals: circleci/evals@1.0.5
+
+jobs:
+  hello-world:
+    docker:
+      - image: cimg/node:17.2.0 
+    steps:
+      - checkout
+      - run: echo "hello, world"
+  eval:
+    docker:
+      - image: cimg/python:3.10
+    steps:
+      - checkout
+      - evals/eval:
+          circle_pipeline_id: << pipeline.id >>
+          cmd: python run_eval.py
+          eval_platform: other
+
+workflows:
+  example:
+    jobs:
+      - hello-world
+      - eval
