@@ -8,7 +8,7 @@ jobs:
   test-node:
     # Install node dependencies and run tests
     executor: node/default
-    environment:
+    environment: 
       JEST_JUNIT_OUTPUT_DIR: ./test-results/
     steps:
       - checkout
