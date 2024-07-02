@@ -62,11 +62,20 @@ workflows:
   build-and-test:
     jobs:
       - test-node
+          context:
+            - OpenAI-CustomName1
+            - CloudFlare-CustomName1
+            - Braintrust-CustomName1
       - eval
+          context:
+            - OpenAI-CustomName1
+            - CloudFlare-CustomName1
+            - Braintrust-CustomName1
       - build-node:
+          context:
+            - OpenAI-CustomName1
+            - CloudFlare-CustomName1
+            - Braintrust-CustomName1
           requires:
             - test-node
- 
-    # - deploy:
-    #     requires:
-    #       - build-node
+
