@@ -17,7 +17,7 @@ jobs:
       - run: echo $CIRCLE_BRANCH
       - run: echo $CIRCLE_BUILD_URL
       - run: echo <<pipeline.number>>
-      - run: echo <<pipeline.trigger_source>>
+      - run: echo <<pipeline.trigger_source>> 
       - run: echo <<pipeline.id>>  
       - run: echo <<pipeline.project.git_url>>
       - run: echo <<pipeline.git.tag>>
@@ -65,7 +65,7 @@ jobs:
       - run: echo $CIRCLE_PULL_REQUEST
       - run: echo $CIRCLE_REPOSITORY_URL
       - run: echo << pipeline.git.base_revision >>
-      - run: echo << pipeline.trigger_parameters.github_app.repo_url >>
+      - run: echo << pipeline.trigger_parameters.github_app.repo_url >> 
 workflows:
   my-workflow2:
     jobs:
