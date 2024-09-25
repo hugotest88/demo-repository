@@ -3,7 +3,7 @@ version: 2.1
 jobs:
  build_arm64:
      docker:
-       - image: cimg/base:stable
+       - image: cimg/base:current
      resource_class: arm.large
      steps:
        - run: echo "why isn't this showing up"
