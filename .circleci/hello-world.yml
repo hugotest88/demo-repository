@@ -1,6 +1,16 @@
 version: 2.1
 
 jobs:
+ build_arm64:
+     docker:
+       - image: cimg/base:stable
+     resource_class: arm.large
+     steps:
+       - run:
+           name: Clone Foundry Repository
+           command: git clone https://github.com/foundry-rs/foundry.git
+
+#jobs:
  # buildTag:
  #   docker:
  #     - image: cimg/node:17.2.0 # the primary container, where your job's commands are run
@@ -8,26 +18,26 @@ jobs:
  #     - checkout # check out the code in the project directory
 #      - run: echo "hello world" # run the `echo` command
 
-  buildNoTag:
-    docker:
-      - image: cimg/node:17.2.0 # the primary container, where your job's commands are run
-    steps:
-      - checkout # check out the code in the project directory 
-      - run: echo "hello world" # run the `echo` command 
-      - run: echo $CIRCLE_PULL_REQUEST
-      - run: echo $CIRCLE_REPOSITORY_URL
-      - run: echo "This is pipeline ID << pipeline.id >>"
-      - run: echo "This is base revision << pipeline.git.base_revision >>" 
-      - run: echo << pipeline.trigger_parameters.github_app.repo_url >>  
-      - run: echo $CIRCLE_PR_REPONAME 
-      - run: echo $CIRCLE_PR_NUMBER
+ # buildNoTag:
+ #   docker:
+ #     - image: cimg/node:17.2.0 # the primary container, where your job's commands are run
+ #   steps:
+ #     - checkout # check out the code in the project directory 
+ #     - run: echo "hello world" # run the `echo` command 
+ #     - run: echo $CIRCLE_PULL_REQUEST
+ #     - run: echo $CIRCLE_REPOSITORY_URL
+ #    - run: echo "This is pipeline ID << pipeline.id >>"
+ #     - run: echo "This is base revision << pipeline.git.base_revision >>" 
+ #     - run: echo << pipeline.trigger_parameters.github_app.repo_url >>  
+ #     - run: echo $CIRCLE_PR_REPONAME 
+ #     - run: echo $CIRCLE_PR_NUMBER
 
   
 
 workflows:
-  untagged-build:
+  testGHApp:
    jobs:
-      - buildNoTag
+      - build_arm64
 #  tagged-build:
 #    jobs: 
 #      - buildTag:
