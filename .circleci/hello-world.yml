@@ -1,15 +1,69 @@
 version: 2.1
 
 jobs:
- build_arm64:
-     docker:
-       - image: cimg/base:current
-     resource_class: arm.large
-     steps:
-       - run: echo "why isn't this showing up"
-       - run:
-           name: Clone Foundry Repository
-           command: git clone https://github.com/foundry-rs/foundry.git
+  build:
+    docker:
+      - image: cimg/node:20.16.0
+        auth:
+          username: flowersandscumbags
+          password: $xxxxxxxxxxxxxxxxxxx
+    steps:
+      - setup_remote_docker  # Enable Docker commands within CircleCI
+      - checkout  # Check out the source code
+      - restore_cache:  # Restore dependency cache if available
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      - run:
+    name: Install Python dependencies
+    command: |
+      python3 -m venv venv
+      . venv/bin/activate
+      pip install -r requirements.txt
+      
+      - run:
+          name: Install Dependencies
+          command: npm install --legacy-peer-deps
+      - save_cache:  # Save dependency cache for future builds
+          paths:
+            - ./node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - run:
+          name: Build Docker Image
+          command: docker build -t flowersandscumbags/automated-license-checker .
+      - run:
+          name: Push Docker Image to Docker Hub
+          command: |
+            echo $DOCKERHUB_ACCESS_TOKEN | docker login -u flowersandscumbags --password-stdin
+            docker push flowersandscumbags/automated-license-checker
+      - run:
+          name: Run Tests
+          command: npm test
+      - run:
+          name: Notify Datadog
+          command: |
+            if [ -n "$DATADOG_API_KEY" ]; then
+              curl -X POST -H "Content-type: application/json" \
+              -d '{"title": "Build completed", "text": "The build has completed successfully.", "priority": "normal"}' \
+              "https://api.datadoghq.com/api/v1/events?api_key=${DATADOG_API_KEY}"
+            else
+              echo "Datadog API key not found"
+            fi
+      - run:
+          name: Deploy to Heroku
+          command: |
+            echo "  machine api.heroku.com" > ~/.netrc
+            echo "  login $HEROKU_EMAIL" >> ~/.netrc
+            echo "  password $HEROKU_API_KEY" >> ~/.netrc
+            echo "  machine git.heroku.com" >> ~/.netrc
+            echo "  login $HEROKU_EMAIL" >> ~/.netrc
+            echo "  password $HEROKU_API_KEY" >> ~/.netrc
+            git remote add heroku https://git.heroku.com/stark-wave-12950.git
+            git push heroku main
+
+workflows:
+  jobs:
+    - build
 
 #jobs:
  # buildTag:
@@ -35,9 +89,9 @@ jobs:
 
   
 
-workflows:
-  testGHApp:
-   jobs:
+#workflows:
+#  testGHApp:
+#   jobs:
       - build_arm64
 #  tagged-build:
 #    jobs: 
