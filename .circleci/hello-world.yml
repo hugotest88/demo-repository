@@ -18,7 +18,7 @@ jobs:
   
 
 workflows:
-  untagged-build:
+  hello-world:
    jobs:
       - buildNoTag
 #  tagged-build:
