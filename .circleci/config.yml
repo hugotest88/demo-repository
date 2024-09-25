@@ -72,5 +72,5 @@ workflows:
 #      - hold: 
 #          type: approval
       - hello2-job:
-#          requires:
+#          requires: 
 #            - hold
