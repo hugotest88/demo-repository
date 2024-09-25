@@ -15,8 +15,8 @@ jobs:
             - v1-dependencies-{{ checksum "package.json" }}
             - v1-dependencies-
       - run:
-    name: Install Python dependencies
-    command: |
+          name: Install Python dependencies
+          command: |
       python3 -m venv venv
       . venv/bin/activate
       pip install -r requirements.txt
