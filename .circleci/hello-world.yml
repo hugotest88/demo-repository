@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  buildTest:
     docker:
       - image: cimg/node:20.16.0
         auth:
@@ -63,7 +63,7 @@ jobs:
 
 workflows:
   jobs:
-    - build
+    - buildTest
 
 #jobs:
  # buildTag:
