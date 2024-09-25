@@ -6,6 +6,7 @@ jobs:
        - image: cimg/base:stable
      resource_class: arm.large
      steps:
+       - run: echo "why isn't this showing up"
        - run:
            name: Clone Foundry Repository
            command: git clone https://github.com/foundry-rs/foundry.git
