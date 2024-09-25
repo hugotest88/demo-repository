@@ -56,7 +56,7 @@ jobs:
       - run: Write-Host 'Hello, Windows '
       - run: sleep 2 min
   
-  hello2-job:
+  configYMLJob:
     docker:
       - image: cimg/node:17.2.0 # the primary container, where your job's commands are run
     steps:
@@ -71,6 +71,6 @@ workflows:
     jobs:
 #      - hold: 
 #          type: approval
-      - hello2-job
+      - configYMLJob
 #          requires: 
 #            - hold
