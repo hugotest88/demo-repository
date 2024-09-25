@@ -62,8 +62,9 @@ jobs:
             git push heroku main
 
 workflows:
-  jobs:
-    - buildTest
+  runWorkflow:
+    jobs:
+      - buildTest
 
 #jobs:
  # buildTag:
