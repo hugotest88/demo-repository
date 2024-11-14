@@ -1,29 +1,153 @@
-version: 2.1
+version: 3
 
-parameters:
-  test:
-    type: string
-    default: "Im a test"
-  do_release:
-    type: enum
-    enum: ['no', 'yes']
-    default: 'no'
-  something_s3_something:
-    type: string
-    default: 's3yeah'
+orbs:
+  slack: circleci/slack@5.0.0
+
+defaults: &defaults
+  working_directory: ~/hinterview/SnipInt
+  shell: /bin/bash --login
+  environment:
+    DATABASE_USERNAME: root
+  parallelism: 2
+  docker:
+    - image: cimg/ruby:3.1.3-node
+      environment:
+        RAILS_ENV: test
+    - image: cimg/postgres:16.0
+      environment:
+        POSTGRES_USER: root
+        POSTGRES_DB: snipit_test
+        POSTGRES_HOST_AUTH_METHOD: trust
+    - image: redis
+  resource_class: medium+
+
+x-deployment-env-setup: &x-deployment-env-setup
+  docker:
+    - image: cimg/ruby:3.1.3-node
+      environment:
+        RAILS_ENV: test
+  working_directory: ~/hinterview/SnipInt
+  shell: /bin/bash --login
+
+x-deployment-heroku-setup-script: &x-deployment-heroku-setup-script
+  run:
+    name: Run Heroku Setup Script
+    command: bash .circleci/setup-heroku.sh
+
+x-deploy-job: &x-deploy-job
+  <<: *x-deployment-env-setup
+  steps:
+    - add_ssh_keys:
+        fingerprints:
+          - "d4:2f:97:3c:d2:3c:50:e9:4a:5d:7f:a3:0b:36:1a:1b"
+          - "44:62:0a:d1:b2:bf:8f:9c:a9:e4:33:ff:44:0b:ed:29"
+    - checkout
+    - *x-deployment-heroku-setup-script
+    - run:
+        name: Deploy Build To Heroku
+        command: bash .circleci/deploy-to-heroku.sh
 
 jobs:
-  configyml:
-    docker:
-      - image: cimg/node:17.2.0 # the primary container, where your job's commands are run
+  build:
+    <<: *defaults
     steps:
-      - checkout # check out the code in the project directory
-      - run: echo "i'm config.yml" # run the `echo` command
-      - run: echo << pipeline.parameters.test >> # print the value of the test parameter
-      - run: echo << pipeline.parameters.do_release >>
-      - run: echo << pipeline.parameters.something_s3_something >>
+      - add_ssh_keys:
+          fingerprints:
+            - "d4:2f:97:3c:d2:3c:50:e9:4a:5d:7f:a3:0b:36:1a:1b"
+            - "44:62:0a:d1:b2:bf:8f:9c:a9:e4:33:ff:44:0b:ed:29"
+      - checkout
+      - save_cache:
+          key: v2-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/hinterview/SnipInt
+      - run:
+          name: Configure SSH agent
+          command: |
+            ssh-add -D
+            ssh-add ~/.ssh/id_rsa_d42f973cd23c50e94a5d7fa30b361a1b
+      - run: mkdir -p ~/artifacts ~/rspec
+      - run:
+          name: Install Required Packages
+          command: bash .circleci/install-required-packages.sh
+      - restore_cache:
+          keys:
+            - hinterview-bundle-v3-{{ checksum "Gemfile.lock" }}
+            - hinterview-bundle-v3-
+      - run:
+          name: Bundle Install
+          command: "bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3"
+      - save_cache:
+          key: hinterview-bundle-v3-{{ checksum "Gemfile.lock" }}
+          paths:
+            - vendor/bundle
+      - run:
+          name: "Setup Database"
+          command: "bundle exec rails db:create db:migrate --trace"
+          environment:
+            RAILS_ENV: test
+            RACK_ENV: test
+      - run:
+          name: "Rubocop style check"
+          command: case $CIRCLE_NODE_INDEX in 0) bundle exec rubocop . ;; esac
+      - run:
+          name: "Run brakeman"
+          command: 'if [[ "${CIRCLE_NODE_INDEX}" == 0 ]] ; then bundle exec brakeman --no-exit-on-error ; fi'
+      - run:
+          name: "Run RSpec tests"
+          command: |
+            circleci tests glob "spec/**/*_spec.rb" | circleci tests run --command="xargs bundle exec rspec --profile 10 --format documentation --format RspecJunitFormatter -o ~/rspec/rspec.xml --require spec_helper --require rails_helper" --verbose --split-by=timings
+          environment:
+            RAILS_ENV: test
+            RACK_ENV: test
+            REPLIES_ADMIN_EMAIL: "reply@hinterview.com"
+      - store_test_results:
+          path: ~/rspec
+      - slack/notify:
+          channel: "engineering-team"
+          event: fail
+          branch_pattern: 'master|release'
+          template: basic_fail_1
+
+  deploy: *x-deploy-job
+
+  deploy-dev: *x-deploy-job
+
+  anycable-deploy:
+    <<: *x-deployment-env-setup
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "d4:2f:97:3c:d2:3c:50:e9:4a:5d:7f:a3:0b:36:1a:1b"
+            - "44:62:0a:d1:b2:bf:8f:9c:a9:e4:33:ff:44:0b:ed:29"
+      - checkout
+      - *x-deployment-heroku-setup-script
+      - run:
+          name: Deploy Build To Anycable Heroku
+          command: bash .circleci/deploy-to-heroku.sh anycable
 
 workflows:
-  configYML:
-    jobs: 
-      - configyml
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+      - deploy-dev:
+          filters:
+            branches:
+              only:
+                - dev
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - release
+      - anycable-deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
+                - release
