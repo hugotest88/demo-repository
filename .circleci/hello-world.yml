@@ -22,6 +22,7 @@ jobs:
       - run: echo $CIRCLE_PR_REPONAME 
       - run: echo $CIRCLE_PR_NUMBER
       - run: echo << pipeline.git.commit.author_email >>
+      - run: exit 1
 
   
 
