@@ -9,7 +9,7 @@ jobs:
       - run: echo "hello world"
       - run: echo "hi"
       - run: echo $CIRCLE_PULL_REQUEST
-      - run: echo $CIRCLE_REPOSITORY_URL
+      - run: echo $CIRCLE_REPOSITORY_URL 
       - run: echo "This is pipeline ID << pipeline.id >>"
       - run: echo "This is base revision << pipeline.git.base_revision >>"
       - run: echo << pipeline.trigger_parameters.github_app.repo_url >>
