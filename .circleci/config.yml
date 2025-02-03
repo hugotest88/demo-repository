@@ -1,3 +1,4 @@
+
 version: 2.1
 
 jobs:
@@ -15,8 +16,17 @@ jobs:
       - run: echo $CIRCLE_PR_REPONAME
       - run: echo $CIRCLE_PR_NUMBER
       - run: echo << pipeline.git.commit.author_email >>
+      - run: yarn test
+
+  buildJob:
+    docker:
+      - image: cimg/node:18.0.0
+    steps:
+      - checkout
+      - run: yarn build
 
 workflows:
   helloWorldWorld:
    jobs:
       - helloWorld
+      - buildJob
