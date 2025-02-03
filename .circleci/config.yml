@@ -3,13 +3,12 @@ version: 2.1
 jobs:
   helloWorld:
     docker:
-      - image: cimg/node:17.2.0
+      - image: cimg/node:18.0.0
     steps:
       - checkout
       - run: echo "hello world"
-      - run: echo "hi"
       - run: echo $CIRCLE_PULL_REQUEST
-      - run: echo $CIRCLE_REPOSITORY_URL 
+      - run: echo $CIRCLE_REPOSITORY_URL
       - run: echo "This is pipeline ID << pipeline.id >>"
       - run: echo "This is base revision << pipeline.git.base_revision >>"
       - run: echo << pipeline.trigger_parameters.github_app.repo_url >>
@@ -17,18 +16,7 @@ jobs:
       - run: echo $CIRCLE_PR_NUMBER
       - run: echo << pipeline.git.commit.author_email >>
 
-  pushToMain:
-    docker:
-      - image: cimg/node:17.2.0
-    steps:
-      - checkout
-      - run: echo "This job runs only on pushes to the main branch"
-
 workflows:
-  helloworldYML:
-    jobs:
+  helloWorldWorld:
+   jobs:
       - helloWorld
-      - pushToMain:
-          filters:
-            branches:
-              only: main
