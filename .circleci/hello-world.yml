@@ -22,7 +22,7 @@ jobs:
       - image: circleci/flutter:latest
     steps:
       - checkout
-      - flutter/initialize
+ #     - flutter/initialize
       - run: flutter pub get
       - run: flutter test
 
