@@ -1,26 +1,36 @@
 version: 2.1
 
+dependencies:
+  flutter:
+    version: 1.0.0
+
+orbs:
+  flutter: circleci/flutter@1.0.0
+
 jobs:
-  flutterBuild:
+  build:
     docker:
-      - image: cimg/flutter:3.0.3
+      - image: circleci/flutter:latest
     steps:
       - checkout
+      - flutter/initialize
       - run: flutter pub get
       - run: flutter build apk
 
-  flutterTest:
+  test:
     docker:
-      - image: cimg/flutter:3.0.3
+      - image: circleci/flutter:latest
     steps:
       - checkout
+      - flutter/initialize
       - run: flutter pub get
       - run: flutter test
 
 workflows:
-  buildAndTest:
+  version: 2
+  build-and-test:
     jobs:
-      - flutterBuild
-      - flutterTest:
+      - build
+      - test:
           requires:
-            - flutterBuild
+            - build
