@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   flutterBuild:
     docker:
-      - image: cirrusci/flutter:latest
+      - image: cimg/flutter:3.0.3
     steps:
       - checkout
       - run: flutter pub get
@@ -11,7 +11,7 @@ jobs:
 
   flutterTest:
     docker:
-      - image: cirrusci/flutter:latest
+      - image: cimg/flutter:3.0.3
     steps:
       - checkout
       - run: flutter pub get
