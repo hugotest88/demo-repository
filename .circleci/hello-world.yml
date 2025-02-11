@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   check-circleci-cli:
     docker:
-      - image: circleci/circleci-cli:latest
+      - image: circleci/circleci-cli
     steps:
       - run:
           name: Print CircleCI CLI Version
