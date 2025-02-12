@@ -58,15 +58,16 @@ workflows:
     jobs:
       - build_and_push_python_image:
           context: gcr-context
-          filters:
-            branches:
-              only: main
       - test:
           requires:
             - build_and_push_python_image
-          when: << pipeline.parameters.trigger_release >>            
+          filters:
+            branches:
+              only: main  # Adjust as necessary
+            when:
+              - << pipeline.parameters.trigger_release >>
 
 parameters:
   trigger_release:
     type: boolean
-    default: false  # Use this parameter to control release triggering
+    default: false  # Use thi
