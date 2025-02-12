@@ -1,14 +1,78 @@
 version: 2.1
+
+orbs:
+  aws-ecr: circleci/aws-ecr@9.3.7
+  aws-cli: circleci/aws-cli@5.1.2
+
 jobs:
-  check-circleci-cli:
+  build_and_push_python_image:
     docker:
-      - image: circleci/circleci-cli
+      - image: python:3.9-slim
     steps:
+      - checkout
       - run:
-          name: Print CircleCI CLI Version
-          command: circleci version
+          name: Install dependencies
+          command: |
+            pip install -r requirements.txt
+      - run:
+          name: Build Docker Image
+          command: |
+            docker build -t my-python-app .
+      - aws-ecr/build_and_push_image:
+          repo: my-python-app
+          tag: ${CIRCLE_SHA1}
+          auth:
+            - aws-cli/setup:
+                role_arn: arn:aws:iam::123456789012:role/YOUR_ROLE_HERE
+      - run:
+          name: Trigger Release
+          command: |
+            if [ "${CIRCLE_TRIGGER_RELEASE}" = "true" ]; then
+              echo "Releasing version ${CIRCLE_SHA1} to production..."
+              # Add your release commands here
+            else
+              echo "Release not triggered."
+            fi
+
+  test:
+    docker:
+      - image: cimg/python:3.9
+    parallelism: 4  # Run tests in parallel across 4 containers
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            pip install -r requirements.txt
+      - run:
+          name: Run tests
+          command: |
+            mkdir test-results
+            TEST_FILES=$(circleci tests glob "**/test_*.py" | circleci tests split --split-by=timings)
+            pytest -o junit_family=legacy --junitxml=test-results/junit.xml $TEST_FILES
+      - store_test_results:
+          path: test-results 
+
 workflows:
-  version: 2
-  build:
+  build_and_test:
     jobs:
-      - check-circleci-cli
+      - build_and_push_python_image:
+          context: gcr-context
+          filters:
+            branches:
+              only: main
+      - test:
+          requires:
+            - build_and_push_python_image
+      - release:
+          requires:
+            - build_and_push_python_image
+          filters:
+            branches:
+              only: main
+          when: << pipeline.parameters.trigger_release >>
+
+parameters:
+  trigger_release:
+    type: boolean
+    default: false  # Use this parameter to control release triggering
