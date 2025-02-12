@@ -64,13 +64,7 @@ workflows:
       - test:
           requires:
             - build_and_push_python_image
-      - release:
-          requires:
-            - build_and_push_python_image
-          filters:
-            branches:
-              only: main
-          when: << pipeline.parameters.trigger_release >>
+          when: << pipeline.parameters.trigger_release >>            
 
 parameters:
   trigger_release:
