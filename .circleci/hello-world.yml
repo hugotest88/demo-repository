@@ -15,8 +15,17 @@ jobs:
       - run:
           name: "Curl Yahoo"
           command: "curl https://www.yahoo.com"
+  security-scan:
+    docker:
+      - image: aquasec/trivy:latest
+    steps:
+      - checkout
+      - run:
+          name: "Run Trivy Security Scan"
+          command: "trivy filesystem --exit-code 1 --severity HIGH,CRITICAL ."
 
 workflows:
   hello-workflow:
     jobs:
       - hello-job
+      - security-scan
