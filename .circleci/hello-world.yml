@@ -1,31 +1,19 @@
 version: 2.1
 
 jobs:
-  hello-job:
+  build:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/node:current
     steps:
       - checkout
       - run:
-          name: "Say Hello"
-          command: "echo Hello, World!"
+          name: Install dependencies
+          command: npm install
       - run:
-          name: "Curl ESPN"
-          command: "curl https://www.espn.com"
-      - run:
-          name: "Curl Yahoo"
-          command: "curl https://www.yahoo.com"
-  security-scan:
-    docker:
-      - image: aquasec/trivy:latest
-    steps:
-      - checkout
-      - run:
-          name: "Run Trivy Security Scan"
-          command: "trivy filesystem --exit-code 1 --severity HIGH,CRITICAL ."
+          name: Build the app
+          command: npm run build
 
 workflows:
-  hello-workflow:
+  build-workflow:
     jobs:
-      - hello-job
-      - security-scan
+      - build
