@@ -12,6 +12,9 @@ jobs:
       - run:
           name: "Curl ESPN"
           command: "curl https://www.espn.com"
+      - run:
+          name: "Curl Yahoo"
+          command: "curl https://www.yahoo.com"
 
 workflows:
   hello-workflow:
