@@ -3,14 +3,14 @@ version: 2.1
 jobs:
   trivy_security_scan:
     docker:
-      - image: docker:latest
+      - image: cimg/base:stable
     steps:
       - checkout
       - setup_remote_docker
       - run:
           name: Install Trivy
           command: |
-            apk --no-cache add curl
+            apt-get update && apt-get install -y curl
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
       - run:
           name: Trivy Security Scan
