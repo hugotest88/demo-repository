@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  build:
+  scan:
     docker:
       - image: cimg/node:current
     steps:
@@ -10,10 +10,10 @@ jobs:
           name: Install dependencies
           command: npm install
       - run:
-          name: Build the app
-          command: npm run build
+          name: Run scan
+          command: npm run scan
 
 workflows:
-  build-workflow:
+  build-and-scan:
     jobs:
-      - build
+      - scan
