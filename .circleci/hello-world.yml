@@ -1,19 +1,23 @@
 version: 2.1
 
 jobs:
-  scan:
+  scan_with_trivy:
     docker:
-      - image: cimg/node:current
+      - image: docker:latest
     steps:
       - checkout
+      - setup_remote_docker
       - run:
-          name: Install dependencies
-          command: npm install
+          name: Install Trivy
+          command: |
+            apk --no-cache add curl
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
       - run:
-          name: Run scan
-          command: npm run scan
+          name: Run Trivy Scan
+          command: trivy scan your-image
 
 workflows:
-  build-and-scan:
+  version: 2
+  scan:
     jobs:
-      - scan
+      - scan_with_trivy
