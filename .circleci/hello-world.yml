@@ -8,10 +8,13 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: Install Prerequisites
+          command: |
+            sudo apt-get update && sudo apt-get install -y curl
+      - run:
           name: Install Trivy
           command: |
-            apt-get update && apt-get install -y curl
-            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
       - run:
           name: Trivy Security Scan
           command: trivy fs .
