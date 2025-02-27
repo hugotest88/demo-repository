@@ -1,7 +1,7 @@
 version: 2.1
 
 jobs:
-  scan_with_trivy:
+  trivy_security_scan:
     docker:
       - image: docker:latest
     steps:
@@ -13,11 +13,10 @@ jobs:
             apk --no-cache add curl
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
       - run:
-          name: Run Trivy Scan
-          command: trivy scan your-image
+          name: Trivy Security Scan
+          command: trivy fs .
 
 workflows:
-  version: 2
-  scan:
+  security_scan_workflow:
     jobs:
-      - scan_with_trivy
+      - trivy_security_scan
