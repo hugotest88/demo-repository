@@ -1,45 +1,22 @@
 version: 2.1
 
-executors:
-  node-executor:
-    docker:
-      - image: cimg/node:18.20.5
-    working_directory: ~/project
-  trivy-executor:
-    docker:
-      - image: aquasec/trivy:latest
-    working_directory: ~/project
-
 jobs:
-  build-node-app:
-    executor: node-executor
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - npm-cache-{{ checksum "package-lock.json" }}
-            - npm-cache-
-      - run:
-          name: Install dependencies
-          command: npm install
-      - save_cache:
-          paths:
-            - ~/.npm
-          key: npm-cache-{{ checksum "package-lock.json" }}
-      - run:
-          name: Build the application
-          command: npm run build
-
-  trivy-scan:
-    executor: trivy-executor
+  hello-job:
+    docker:
+      - image: cimg/base:stable
     steps:
       - checkout
       - run:
-          name: Run Trivy Scan
-          command: trivy fs .
+          name: "Say Hello"
+          command: "echo Hello, World!"
+      - run:
+          name: "Curl ESPN"
+          command: "curl https://www.espn.com"
+      - run:
+          name: "Curl Yahoo"
+          command: "curl https://www.yahoo.com"
 
 workflows:
-  build_and_scan:
+  hello-workflow:
     jobs:
-      - build-node-app
-      - trivy-scan
+      - hello-job
